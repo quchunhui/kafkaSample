@@ -40,7 +40,8 @@ public class GroupConsumer extends Thread {
         //要读取的数据主题
         String topic = Constants.topic;
         //要启动的线程数
-        int threads = Integer.parseInt(args[0]);
+        int threads = 1/* Integer.parseInt(args[0]) */;
+		System.out.println("GroupConsumer threads count=" + threads);
 
 		GroupConsumer example = new GroupConsumer(zooKeeper, groupId, topic);
         example.run(threads);
@@ -105,7 +106,8 @@ public class GroupConsumer extends Thread {
         //开启消费者进程，读取主题下的流
         int threadNumber = 0;
         for (KafkaStream<byte[], byte[]> stream : streams) {
-            this.executor.submit(new ConsumerLal(stream, threadNumber));
+    		System.out.println("Consumer Start. threadNumber=" + threadNumber);
+        	this.executor.submit(new ConsumerLal(stream, threadNumber));
             threadNumber++;
         }
     }
@@ -139,9 +141,10 @@ class ConsumerLal implements Runnable {
     }
  
     public void run() {
+		System.out.println("ConsumerLal Start. m_threadNumber=" + m_threadNumber);
         ConsumerIterator<byte[], byte[]> it = m_stream.iterator();
         while (it.hasNext()){
-            System.out.println("Thread " + m_threadNumber + ": " + new String(it.next().message()));
+            System.out.println("GroupConsumer Thread " + m_threadNumber + ": " + new String(it.next().message()));
         }
         System.out.println("Shutting down Thread: " + m_threadNumber);
     }

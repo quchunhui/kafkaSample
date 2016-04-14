@@ -7,10 +7,8 @@ import kafka.common.ErrorMapping;
 import kafka.common.TopicAndPartition;
 import kafka.javaapi.*;
 import kafka.javaapi.consumer.SimpleConsumer;
-import kafka.message.MessageAndOffset;
 import test.kafkaMQ.common.Constants;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -108,44 +106,20 @@ public class PartitionConsumer {
             //请求失败处理
             if (fetchResponse.hasError()) {
                 numErrors++;
-                short code = fetchResponse.errorCode(a_topic, a_partition);
-                System.out.println("Error fetching data from the Broker:" + leadBroker + " Reason: " + code);
-                if (numErrors > 5) break;
-                if (code == ErrorMapping.OffsetOutOfRangeCode())  {
-                    readOffset = getLastOffset(consumer,a_topic, a_partition, kafka.api.OffsetRequest.LatestTime(), clientName);
-                    continue;
+                if (numErrors > 5) {
+                	break;
                 }
-                consumer.close();
-                consumer = null;
-                leadBroker = findNewLeader(leadBroker, a_topic, a_partition, a_port);
+
+                //偏移量无效时，重新获得偏移量
+                short code = fetchResponse.errorCode(a_topic, a_partition);
+                if (code == ErrorMapping.OffsetOutOfRangeCode()) {
+                    readOffset = getLastOffset(consumer, a_topic, a_partition, kafka.api.OffsetRequest.LatestTime(), clientName);
+                }
+
                 continue;
             }
+
             numErrors = 0;
- 
-            long numRead = 0;
-            for (MessageAndOffset messageAndOffset : fetchResponse.messageSet(a_topic, a_partition)) {
-                long currentOffset = messageAndOffset.offset();
-                if (currentOffset < readOffset) {
-                    System.out.println("Found an old offset: " + currentOffset + " Expecting: " + readOffset);
-                    continue;
-                }
-                readOffset = messageAndOffset.nextOffset();
-                ByteBuffer payload = messageAndOffset.message().payload();
- 
-                byte[] bytes = new byte[payload.limit()];
-                payload.get(bytes);
-                System.out.println(String.valueOf(messageAndOffset.offset()) + ": " + new String(bytes, "UTF-8"));
-                numRead++;
-                a_maxReads--;
-            }
- 
-            if (numRead == 0) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ie) {
-                	// no logic
-                }
-            }
         }
 
         if (consumer != null) {
@@ -180,42 +154,7 @@ public class PartitionConsumer {
         return offsets[0];
     }
  
-    /**
-     * findNewLeader
-     * @param a_oldLeader
-     * @param a_topic
-     * @param a_partition
-     * @param a_port
-     * @return
-     * @throws Exception
-     */
-    private String findNewLeader(String a_oldLeader, String a_topic, int a_partition, int a_port) throws Exception {
-        for (int i = 0; i < 3; i++) {
-            boolean goToSleep = false;
-            PartitionMetadata metadata = findLeader(m_replicaBrokers, a_port, a_topic, a_partition);
-            if (metadata == null) {
-                goToSleep = true;
-            } else if (metadata.leader() == null) {
-                goToSleep = true;
-            } else if (a_oldLeader.equalsIgnoreCase(metadata.leader().host()) && i == 0) {
-                // first time through if the leader hasn't changed give ZooKeeper a second to recover
-                // second time, assume the broker did recover before failover, or it was a non-Broker issue
-                //
-                goToSleep = true;
-            } else {
-                return metadata.leader().host();
-            }
-            if (goToSleep) {
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException ie) {
-                }
-            }
-        }
-        System.out.println("Unable to find new leader after Broker failure. Exiting");
-        throw new Exception("Unable to find new leader after Broker failure. Exiting");
-    }
- 
+
     /**
      * Leader不在时，选举新的Leader
      * @param a_seedBrokers

@@ -12,8 +12,7 @@ public class SyncProduce {
 	public static void main(String[] args) {
 		System.out.println("SyncProduce start!");
 
-		long events = Long.MAX_VALUE;
-        Random rnd = new Random();
+		long events = Constants.ProducerMaxCount;
  
         Properties props = new Properties();
         //消费者获取消息元信息
@@ -30,10 +29,10 @@ public class SyncProduce {
  
         for (long nEvents = 0; nEvents < events; nEvents++) {
         	long runtime = new Date().getTime();  
-			String ip = "192.168.2." + rnd.nextInt(255); 
+            String ip = "192.168.3." + nEvents;
 			String msg = runtime + ",www.example.com," + ip; 
-
 			KeyedMessage<String, String> data = new KeyedMessage<String, String>(Constants.topic, ip, msg);
+    		System.out.println("SyncProduce send data! ip=" + ip + " msg=" + msg);
 			producer.send(data);
         }
 
