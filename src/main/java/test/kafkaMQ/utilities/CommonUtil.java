@@ -1,6 +1,7 @@
 package test.kafkaMQ.utilities;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.Random;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -22,6 +23,26 @@ public class CommonUtil {
 		}
 
 		return result;
+	}
+
+	public static Properties getProperties(boolean isAsync) {
+        Properties props = new Properties();
+
+        //消费者获取消息元信息
+        props.put("metadata.broker.list", CommonUtil.joinHostPort(Constants.hostList, Constants.brokerPort));
+        //message的序列化类
+        props.put("serializer.class", "kafka.serializer.StringEncoder");
+        //分区的策略，默认是取模
+        props.put("partitioner.class", Constants.partitionerClass);
+        if (isAsync) {
+            //确定messages是否同步提交
+    		props.put("producer.type", "async");
+        } else {
+    		//消息的确认模式。异步机制中，下面的确认机制的参数就不需要设置了，即时设置了也没有用。
+            props.put("request.required.acks", "1");
+        }
+
+		return props;
 	}
 
 	public static KeyedMessage<String, String> getSendData(Random randrom, long i) {
@@ -72,7 +93,8 @@ public class CommonUtil {
 
 		String msgId = i + "+" + System.currentTimeMillis();
 		System.out.println("msgId=" + msgId);
-        KeyedMessage<String, String> data = new KeyedMessage<String, String>(Constants.topic, str, msgId);
+		//创建KeyedMessage发送消息，参数1为topic名，参数2为分区名（若为null则随机发到一个分区），参数3为消息
+        KeyedMessage<String, String> data = new KeyedMessage<String, String>(Constants.topic, str);
 
 		return data;
 	}
