@@ -7,7 +7,7 @@ import java.util.Random;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import kafka.producer.KeyedMessage;
-import test.kafkaMQ.beans.RequestBean2;
+import test.kafkaMQ.beans.RequestBean;
 import test.kafkaMQ.common.Constants;
 
 public class CommonUtil {
@@ -54,7 +54,7 @@ public class CommonUtil {
 		String date = RangeTimeUtil.randomDate("2016-03-01 00:00:00", "2016-03-23 00:00:00");
 		String[] enterprises = {"EMS","STO","YUNDA","ZTO","ZJS","SF","YTO"};
 
-		RequestBean2 ro = new RequestBean2();
+		RequestBean ro = new RequestBean();
 		ro.setLogisticProviderID(enterprises[randrom.nextInt(7)]);
 		ro.setMailNo(RandomUtil.generateMixString(12));
 		ro.setMailType("2");

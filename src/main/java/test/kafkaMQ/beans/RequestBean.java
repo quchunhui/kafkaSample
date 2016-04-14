@@ -3,7 +3,7 @@ package test.kafkaMQ.beans;
 import java.io.Serializable;
 
 @SuppressWarnings("serial")
-public class RequestBean2 implements Serializable{
+public class RequestBean implements Serializable{
 	private String logisticProviderID;
 	private String mailNo;
 	private String mailType;

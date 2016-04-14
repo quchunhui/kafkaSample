@@ -17,8 +17,8 @@ public class AsyncProduce {
         Properties props = CommonUtil.getProperties(true);
 
         if (args != null && args.length > 0) {
-    		Executor executor = Executors.newFixedThreadPool(1);
-    		for (int i = 0; i < 1; i++) {
+    		Executor executor = Executors.newFixedThreadPool(10);
+    		for (int i = 0; i < 10; i++) {
     			executor.execute(new RunDemo(props));
     		}
         } else {
@@ -33,7 +33,7 @@ public class AsyncProduce {
         Producer<String, String> producer = new Producer<String, String>(config);
         Random rnd = new Random();
  
-        for (long i = 0; i < 1000; i++) {
+        for (long i = 0; i < 10000; i++) {
         	KeyedMessage<String, String> data = CommonUtil.getSendData(rnd, i);
             producer.send(data);
         }
