@@ -12,7 +12,7 @@ public class SyncProduce {
 	public static void main(String[] args) {
 		System.out.println("SyncProduce start!");
 
-		long events = Constants.ProducerMaxCount;
+		long events = Constants.producerCount;
  
         Properties props = CommonUtil.getProperties(false);
         ProducerConfig config = new ProducerConfig(props);
@@ -23,8 +23,8 @@ public class SyncProduce {
             String ip = "192.168.3." + nEvents;
 			String msg = runtime + ",www.example.com," + ip; 
 			KeyedMessage<String, String> data = new KeyedMessage<String, String>(Constants.topic, msg);
-    		System.out.println("SyncProduce send data! ip=" + ip + " msg=" + msg);
 			producer.send(data);
+    		System.out.println("SyncProduce send data! ip=" + ip + " msg=" + msg);
         }
 
         producer.close();

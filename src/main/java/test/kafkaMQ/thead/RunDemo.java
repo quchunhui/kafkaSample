@@ -23,7 +23,7 @@ public class RunDemo implements Runnable {
 		ProducerConfig config = new ProducerConfig(_pros);
         Producer<String, String> producer = new Producer<String, String>(config);
 
-		for (long i = 0; i < Constants.ProducerMaxCount; i++) {
+		for (long i = 0; i < Constants.producerCount; i++) {
 			producer.send(CommonUtil.getSendData(_randrom, i));
 		}
 

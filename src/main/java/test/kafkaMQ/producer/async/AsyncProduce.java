@@ -38,9 +38,10 @@ public class AsyncProduce {
         Producer<String, String> producer = new Producer<String, String>(config);
         Random rnd = new Random();
  
-        for (long i = 0; i < Constants.ProducerMaxCount; i++) {
+        for (long i = 0; i < Constants.producerCount; i++) {
         	KeyedMessage<String, String> data = CommonUtil.getSendData(rnd, i);
             producer.send(data);
+    		System.out.println("sen success!");
         }
 
         producer.close();
